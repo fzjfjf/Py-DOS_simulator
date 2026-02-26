@@ -1,5 +1,7 @@
 # PyDOS
 
+**PROJECT IS NOT YET FULLY FINISHED**
+
 **PyDOS** is a simple, educational DOS-like shell written in Python. It is designed for learning how operating systems, command-line interfaces, and file systems work.
 
 > ⚠️ This project is **not intended for production use**. It exists purely as a learning project.
