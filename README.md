@@ -1,6 +1,6 @@
 # PyDOS
 
-# PROJECT IS NOT YET FULLY FINISHED
+# PROJECT IS STILL WORK-IN-PROGRESS, NOT ALL FEATURES WORK
 
 **PyDOS** is a simple, educational DOS-like shell written in Python. It is designed for learning how operating systems, command-line interfaces, and file systems work.
 
@@ -11,7 +11,7 @@
 ## Features
 
 - Basic command-line interface (CLI) similar to DOS  
-- File and folder operations: `cd`, `dir`, `mkdir`, `rmdir`, `touch`  
+- File and folder operations: `cd, dir, mkdir, rmdir` (Not finished)
 - Simple command parsing and execution  
 - Error handling to simulate real OS behavior  
 - Modular structure for easier understanding and expansion  
@@ -50,9 +50,9 @@ python main.py
 Try commands like:
 
 ```
-dir
-mkdir test
-cd test
+echo hello
+ver
+shutdown
 ```
 
 ---
