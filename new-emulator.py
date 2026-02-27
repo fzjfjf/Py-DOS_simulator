@@ -124,7 +124,7 @@ class Kernel:
 class Shell:
     def __init__(self):
         self._dos_prompt: str = "C:\\> "
-        self._version_info: str = "PY-DOS 1.0.0 alpha"
+        self._version_info: str = "PY-DOS 1.1.0 alpha"
         self._shell_commands: dict = {}
         self._is_running: bool = True
         self.echo_state: bool = True
@@ -232,6 +232,7 @@ def on_start():
 
 def main():
     shell = on_start()
+    shell.on_start([])
     shell.command_loop()
 
 if __name__ == "__main__":
