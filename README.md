@@ -62,9 +62,8 @@ cd test
 ```
 pydos/
 │
-├── main.py          # Entry point of the program
-├── shell.py         # Command parsing logic
-├── filesystem.py    # File and folder management
+├── main.py          # The whole program
+├── LICENSE
 └── README.md        # Project documentation
 ```
 
