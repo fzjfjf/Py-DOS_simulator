@@ -1,6 +1,6 @@
 # PyDOS
 
-**PROJECT IS NOT YET FULLY FINISHED**
+#PROJECT IS NOT YET FULLY FINISHED
 
 **PyDOS** is a simple, educational DOS-like shell written in Python. It is designed for learning how operating systems, command-line interfaces, and file systems work.
 
