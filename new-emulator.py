@@ -79,6 +79,7 @@ class Kernel:
         }
         self._kernel_commands: dict = {
             "mount": self.mount_drive,
+
         }
 
 
@@ -125,7 +126,13 @@ class Shell:
     def __init__(self):
         self._dos_prompt: str = "C:\\> "
         self._version_info: str = "PY-DOS 1.1.0 alpha"
-        self._shell_commands: dict = {}
+        self._shell_commands = {
+            "ver": self.version,
+            "help": self.help,
+            "echo": self.echo,
+            "cls": self.clear_screen,
+            "shutdown": self.shutdown,
+        }
         self._is_running: bool = True
         self.echo_state: bool = True
 
@@ -135,14 +142,14 @@ class Shell:
         if len(split_input) > 0:        # Ignore empty input
             if split_input[0] == "trigger_bug_check":   # Debug case
                 kernel.bug_check(20, "BUG_CHECK_ON_COMMAND")
-            elif split_input[0] in self._shell_commands:
+            elif split_input[0] in self._shell_commands:    # Check if command is owned by Shell
                 self._shell_commands[split_input[0]](split_input[1:])
-            else:
+            else:       # Pass the command to the kernel
                 kernel.command_resolver(split_input)
 
     def command_loop(self):
         while self._is_running:
-            user_input = input(self._dos_prompt)
+            user_input = input(self._dos_prompt if self.echo_state else "")
             self.parser_and_dispatcher(user_input)
 
     def update_dos_prompt(self):
@@ -207,17 +214,6 @@ class Shell:
 Copyright (C) 2026      All rights reserved
 """)
 
-    # Add all Shell commands to the dict
-    def initialize_shell_commands(self):
-        self._shell_commands = {
-        "ver": self.version,
-        "help": self.help,
-        "echo": self.echo,
-        "cls": self.clear_screen,
-        "shutdown": self.shutdown,
-        }
-
-
 
 
 def on_start():
@@ -227,7 +223,6 @@ def on_start():
     kernel.mount_drive("c", {"folders": {}, "files": []})
 
     shell = Shell()
-    shell.initialize_shell_commands()
     return shell
 
 def main():
