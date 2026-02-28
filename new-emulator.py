@@ -125,7 +125,7 @@ class Kernel:
 class Shell:
     def __init__(self):
         self._dos_prompt: str = "C:\\> "
-        self._version_info: str = "PY-DOS 1.1.0 alpha"
+        self._version_info: str = "PY-DOS 1.2.0 alpha"
         self._shell_commands = {
             "ver": self.version,
             "help": self.help,
