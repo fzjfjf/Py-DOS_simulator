@@ -14,7 +14,8 @@
 - File and folder operations: `cd, dir, mkdir, rmdir` (Not finished)
 - Simple command parsing and execution  
 - Error handling to simulate real OS behavior  
-- Modular structure for easier understanding and expansion  
+- Modular structure for easier understanding and expansion
+- Users  
 
 ---
 
@@ -46,12 +47,18 @@ python main.py
 ```
 
 ### 3. Start using PyDOS
+Log in:
 
+```
+admin
+root
+```
 Try commands like:
 
 ```
 echo hello
 ver
+createuser new_user new_password normal/admin
 shutdown
 ```
 
