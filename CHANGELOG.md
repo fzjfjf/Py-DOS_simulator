@@ -2,7 +2,8 @@
 
 ## v1.4.1 alpha
 - Added detailed descriptions of some commands to help
-
+- Fixed a bug where after logging off and logging back in you couldnt get to the dos prompt
+  
 ## v1.4.0 alpha
 - Added ```cd``` command. ```..```, ```.```, ```/``` and relative paths are supported.
 - Added ```help``` command
