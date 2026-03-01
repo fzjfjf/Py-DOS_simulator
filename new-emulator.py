@@ -17,18 +17,18 @@ class InvalidFileSystemStructure(Exception):
 # ===== Core classes =====
 class FileSystem:
     def __init__(self):
-        self._folder_structure = {}
-        self._drive_label = ""
+        self._folder_structure: dict = {}
+        self._drive_label: str = ""
 
     def initialize_file_system(self, fs):
         # Make a drive label
-        drive_label_list = []
+        drive_label_list: list[str] = []
         for i in range(0, 9):   # Generate a random drive label
-            drive_label_list.append(randint(0, 9))
+            drive_label_list.append(str(randint(0, 9)))
         drive_label_list[4] = "-"
         for i in range(0, 9):   # Turn the numbers into strings
             drive_label_list[i] = str(drive_label_list[i])
-        self._drive_label = "".join(drive_label_list)
+        self._drive_label: str = "".join(drive_label_list)
 
         # Check fs for correct structure and assign fs to folder_structure
         def _validate_folder(folder):
@@ -39,15 +39,15 @@ class FileSystem:
                 - "folders": dict
             """
             if not isinstance(folder, dict):
-                raise InvalidFileSystemStructure("101")
+                    raise InvalidFileSystemStructure("101")
 
-            if "files" not in folder or "folders" not in folder:
+            elif "files" not in folder or "folders" not in folder:
                 raise InvalidFileSystemStructure("102")
 
-            if not isinstance(folder["files"], list):
+            elif not isinstance(folder["files"], list):
                 raise InvalidFileSystemStructure("103")
 
-            if not isinstance(folder["folders"], dict):
+            elif not isinstance(folder["folders"], dict):
                 raise InvalidFileSystemStructure("104")
 
             # Recurse into subfolders
@@ -56,9 +56,9 @@ class FileSystem:
 
         _validate_folder(fs)
 
-        self._folder_structure = fs
+        self._folder_structure: dict = fs
 
-    def get_current_folder(self, path_to_use):
+    def get_current_folder(self, path_to_use: str):
         # Will return a dict of the current folder
         if path_to_use == "/":
             return self._folder_structure
@@ -72,10 +72,30 @@ class FileSystem:
 
         return current_folder
 
-    def change_directory(self):
-        pass
+    def change_directory(self, args: list[str], current_path: str) -> dict:
+        try:
+            new_path: str = args[0]
+        except IndexError:
+            return {"command": "cd", "exitcode": "invalidsyntax", "newpath": current_path}
 
-    def dir_command(self, current_path) -> dict:
+        if new_path == "/":
+            return {"command": "cd", "exitcode": "succesful", "newpath": "/"}
+        elif new_path == ".." and current_path != "/":
+            split_path: list[str] = current_path.split("/")
+            split_path.pop()
+            return {"command": "cd","exitcode": "succesful",
+                   "newpath": ("/".join(split_path)) if len(split_path) > 1 else ("/" + "/".join(split_path))}
+        elif new_path == ".":
+            return {"command": "cd", "exitcode": "succesful", "newpath": current_path}
+        else:
+            current_folder = self.get_current_folder(current_path)
+            if new_path in current_folder["folders"]:
+                return {"command": "cd", "exitcode": "succesful", "newpath": (current_path + "/" + new_path)
+                if current_path != "/" else (current_path + new_path)}
+            else:
+                return {"command": "cd", "exitcode": "invalidsyntax", "newpath": current_path}
+
+    def dir_command(self, current_path: str) -> dict:
         # Will return a list of all items in the current folder
 
         current_folder = self.get_current_folder(current_path)
@@ -91,7 +111,7 @@ class FileSystem:
         }
         return return_value
 
-    def make_directory(self):
+    def make_directory(self, args: list[str]):
         pass
 
     def remove_directory_or_file(self):
@@ -100,18 +120,18 @@ class FileSystem:
 
 class UserAccount:
     def __init__(self):
-        self._user_name = ""
-        self._role = "normal"
-        self._password = ""
+        self._user_name: str = ""
+        self._role: str = "normal"
+        self._password: str = ""
 
     def whoami(self):
         return self._user_name
 
-    def initialize_user(self, args, role_of_current_user):
+    def initialize_user(self, args: list[str], role_of_current_user: str):
         try:
-            name = args[0]
-            password = args[1]
-            role = args[2]
+            name: str = args[0]
+            password: str = args[1]
+            role: str = args[2]
         except IndexError:
             return {"command": "create_user", "exitcode": "invalidsyntax"}
 
@@ -130,7 +150,7 @@ class UserAccount:
     def get_role(self):
         return self._role
 
-    def check_password(self, password_to_check) -> bool:
+    def check_password(self, password_to_check: str) -> bool:
         if not isinstance(password_to_check, str):
             return False
 
@@ -150,39 +170,52 @@ class Kernel:
             "c": FileSystem(),
         }
         self._current_user: str = "root"
-        self._users = {
+        self._users: dict = {
             "admin": UserAccount(),
         }
         self._users["admin"].initialize_user(["admin", "root", "admin"], "admin")
         self.shell = Shell(self)
 
     def on_boot(self):
-        self.mount_drive("c", {"folders": {"docs": {"folders": {}, "files": ["readme.txt", "test.txt"]}},
-                             "files": ["autoexec.bat", "config.sys"]})
+        self.mount_drive("c", {
+            "folders": {
+                "docs": {
+                    "folders": {
+                        "important": {
+                            "folders": {
+
+                            },
+                            "files": []
+                        }
+            },
+                "files": ["readme.txt", "test.txt"]}
+            },
+            "files": ["autoexec.bat", "config.sys"]
+        })
 
         self.login_screen()
 
     def login_screen(self):
         # Is shown at the start, or after typing 'logout' into the shell. Basically its own small shell
         while True:
-            user = input("Enter user name: ")
-            password = input("Enter password: ")
+            user: str = input("Enter user name: ")
+            password: str = input("Enter password: ")
 
             try:
                 if self._users[user].check_password(password):
                     self._current_user = user
-                    self.shell.on_start([])
+                    self.shell.on_start()
                     self.shell.command_loop()
                 else:
                     print("Invalid password")
             except KeyError:
                 print("Invalid user")
 
-    def create_user(self, args):
+    def create_user(self, args: list[str]):
         if args[0] not in self._users:
             self._users[args[0]] = UserAccount()
-            current_role = self._users[self._current_user].get_role()
-            return_value = self._users[args[0]].initialize_user(args, current_role)
+            current_role: str = self._users[self._current_user].get_role()
+            return_value: dict = self._users[args[0]].initialize_user(args, current_role)
             if return_value["exitcode"] == "notenoughprivileges":
                 self._users.pop(args[0])
             return return_value
@@ -190,25 +223,25 @@ class Kernel:
         return {"command": "createuser", "exitcode": "userexists"}
 
 
-    def command_resolver(self, split_user_input):
+    def command_resolver(self, split_user_input: list[str]):
         # Will resolve non-shell commands like CD, DIR, ...
         try:
             if split_user_input[0] == "dir":
                 return self._mounted_drives[self._working_drive].dir_command(self._path)
             elif split_user_input[0] == "cd":
-                new_path = self._mounted_drives[self._working_drive].change_directory(split_user_input[1:])
-                self.update_path(new_path)
+                result = self._mounted_drives[self._working_drive].change_directory(split_user_input[1:], self._path)
+
+                self.update_path(result["newpath"])
+                return result
+
             elif split_user_input[0] == "createuser":
                 return self.create_user(split_user_input[1:])
-            elif split_user_input[0] == "logout":
-                self.shell.clear_screen([])
-                self.login_screen()
             else:
                 return {"command": "invalid"}
         except IndexError:
             return {"command": "createuser", "exitcode": "invalidsyntax"}
 
-    def mount_drive(self, drive_letter, fs):
+    def mount_drive(self, drive_letter: str, fs: dict):
         # Will mount the drive
         self._mounted_drives[drive_letter] = FileSystem()
         try:
@@ -216,7 +249,7 @@ class Kernel:
         except InvalidFileSystemStructure as e:
             e = e.args[0]
             if e == "101":
-                self.bug_check(101, "INVALID_FS-DICT")
+                self.bug_check(101, "INVALID_FS-TYPE")
             elif e == "102":
                 self.bug_check(102, "INVALID_FS-KEYS")
             elif e == "103":
@@ -226,10 +259,10 @@ class Kernel:
             else:
                 self.bug_check(100, "INVALID_FILE_SYSTEM_STRUCTURE")
 
-    def update_path(self, new_path):
-        pass
+    def update_path(self, new_path: str):
+        self._path = new_path
 
-    def bug_check(self, exit_code, exit_code_for_print):
+    def bug_check(self, exit_code: int, exit_code_for_print: str):
         # Kind of like a BSOD or kernel panic
         # Here goes any code that saves the state (currently none)
 
@@ -247,18 +280,18 @@ class Shell:
     def __init__(self, kernel):
         self.kernel = kernel
         self._dos_prompt: str = "C:\\> "
-        self._version_info: str = "PY-DOS 1.3.0 alpha"
-        self._shell_commands = {
+        self._version_info: str = "PY-DOS 1.4.0 alpha"
+        self._shell_commands: dict= {
             "ver": self.version,
             "help": self.help,
             "echo": self.echo,
             "cls": self.clear_screen,
-            "shutdown": self.shutdown,
+            "logoff": self.logoff,
         }
         self._is_running: bool = True
         self.echo_state: bool = True
 
-    def parser_and_dispatcher(self, user_input):
+    def parser_and_dispatcher(self, user_input: str):
         # Parses user input and calls functions accordingly
         split_input = user_input.lower().split()
         if len(split_input) > 0:        # Ignore empty input
@@ -291,15 +324,20 @@ Directory of {self._dos_prompt.strip("> ")}
                         print("Only root can create new admin users") if result["exitcode"] == "notenoughprivileges" else None
                         print("User already exists") if result["exitcode"] == "userexists" else None
 
+                    elif result["command"] == "cd":
+                        print("Invalid syntax") if result["exitcode"] == "invalidsyntax" else None
+                        self.update_dos_prompt(result["newpath"])
+
     def command_loop(self):
         while self._is_running:
             user_input = input(self._dos_prompt if self.echo_state else "")
             self.parser_and_dispatcher(user_input)
 
-    def update_dos_prompt(self):
-        pass
+    def update_dos_prompt(self, new_path: str):
+        self._dos_prompt = "C:" + "\\".join(new_path.split("/")) + "> "
 
     def getchar(self):
+        # Used for /p in dir - to be added
         if name == "nt":
             import msvcrt
             self.getchar = msvcrt.getch()
@@ -317,9 +355,10 @@ Directory of {self._dos_prompt.strip("> ")}
                 return ch
 
     # Shell commands, not dependent on Kernel and FileSystem
-    def shutdown(self, args):
+    def logoff(self, args):
         # Here goes any code that saves the current state of the simulator (currently none)
 
+        self.clear_screen([])
         self._is_running = False
 
     def clear_screen(self, args):
@@ -332,7 +371,7 @@ Directory of {self._dos_prompt.strip("> ")}
             for i in range(0, 100):
                 print("\n")
 
-    def echo(self, args):
+    def echo(self, args: list):
         # Repeats the string provided by user, prints echo state if no string provided
         if len(args) == 0:      # If no arguments are provided
             print("Echo is ON") if self.echo_state else print("Echo is OFF")
@@ -343,15 +382,25 @@ Directory of {self._dos_prompt.strip("> ")}
         else:
             print(" ".join(args))
 
-    def help(self, args):
+    def help(self, args: list):
         # Prints all available commands with short explanations
-        pass
+        if len(args) == 0:
+            print("""
+help - Shows this message
+ver - Shows the version
+echo - Prints the text after the command
+logoff - Logs out of the current session
+createuser - Creates a new user account
+dir - Lists folders and files inside the working directory
+""")
+        else:
+            pass
 
     def version(self, args):
         # Prints the version
         print(f"\n{self._version_info}\n")
 
-    def on_start(self, args):
+    def on_start(self):
         # Prints starting message
         print(f"""{self._version_info}
 
