@@ -1,5 +1,8 @@
 ## Changelog
 
+## v1.4.2 alpha
+- Added mkdir command. Only relative paths supported (Folder is always made in the working directory)
+
 ## v1.4.1 alpha
 - Added detailed descriptions of some commands to help
 - Fixed a bug where after logging off and logging back in you couldnt get to the dos prompt
