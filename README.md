@@ -33,3 +33,7 @@ PyDOS will eventually support:
 - editing a .txt or a .pds file tha exists within the directory PyDOS is in 
 - scripts, with a .pds extension (short for PyDosScript), that are written on your host PC, or through the edit feature in PyDOS
 - saving the state on ```shutdown```, ```logoff``` and when a bugcheck is raised
+
+## Notes
+The defaut account is ```admin```, with the password ```root```.  
+The login screen is CASE SENSITIVE, the shell is CASE INSENSITIVE
