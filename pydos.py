@@ -295,6 +295,7 @@ class Kernel:
                     self._current_user = user
                     self.shell.on_start()
                     self.shell.command_loop()
+                    self.save_state_to_json()
 
                 else:
                     print("Invalid password")
