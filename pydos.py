@@ -111,8 +111,27 @@ class FileSystem:
         }
         return return_value
 
-    def make_directory(self, args: list[str]):
-        pass
+    def make_directory(self, args: list[str], current_path):
+        current_folder = self.get_current_folder(current_path)
+
+        try:
+            folder_name_or_path = args[0]
+        except IndexError:
+            return {"command": "mkdir", "exitcode": "invalidsyntax"}
+
+        if folder_name_or_path.startswith("c:\\"):
+            # Absolute path
+            pass
+        else:
+            # Relative path
+            if folder_name_or_path not in current_folder["folders"]:
+                # Folder doesnt exist
+                current_folder["folders"][folder_name_or_path] = {
+                    "folders": {},
+                    "files": [],
+                }
+            else:
+                return {"command": "mkdir", "exitcode": "folderalreadyexists"}
 
     def remove_directory_or_file(self):
         pass
@@ -239,6 +258,8 @@ class Kernel:
 
             elif split_user_input[0] == "createuser":
                 return self.create_user(split_user_input[1:])
+            elif split_user_input[0] == "mkdir" or split_user_input[0] == "md":
+                return self._mounted_drives[self._working_drive].make_directory(split_user_input[1:], self._path)
             else:
                 return {"command": "invalid"}
         except IndexError:
@@ -330,6 +351,9 @@ Directory of {self._dos_prompt.strip("> ")}
                     elif result["command"] == "cd":
                         print("Invalid syntax") if result["exitcode"] == "invalidsyntax" else None
                         self.update_dos_prompt(result["newpath"])
+                    elif result["command"] == "mkdir":
+                        print("Invalid syntax") if result["exitcode"] == "invalidsyntax" else None
+                        print("Folder already exists") if result["exitcode"] == "folderalreadyexists" else None
 
     def command_loop(self):
         self._is_running = True
