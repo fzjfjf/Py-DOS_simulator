@@ -20,7 +20,7 @@ PyDOS currently supports these comamnds:
 ## Commands that are in progress
 
 PyDOS will eventually support these commands:
-- ```shutdown``` Poweroff the system
+- ```shutdown``` Poweroff the siulator
 - ```mkdir``` or ```md``` Make a new directory
 - ```rmdir``` or ```rm``` Remove a directory
 - ```del``` Delete a file
