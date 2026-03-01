@@ -2,7 +2,7 @@
 
 Disclaimer: The project is under construction, so the README may not reflect the actual changes in each revision
 
-PyDOS is a simple DOS simulator, that replicates some DOS functionalities, and adds other ones. 
+PyDOS is a simple DOS shell simulator, that replicates some DOS functionalities, and adds other ones. 
 
 ## Supported commands
 
@@ -14,13 +14,12 @@ PyDOS currently supports these comamnds:
 - ```createuser username password type``` Will create a new user, type can be ```admin``` or ```normal```   
   Note: Only an admin user can create another admin user
 - ```dir``` Shows all files and folders in the current directory
-- ```help``` Lists all commands with a brief explanation
+- ```help``` Lists all commands with a brief explanation, or provide a command name to get a detailed description
 - ```cd``` Change the working directory
 
 ## Commands that are in progress
 
 PyDOS will eventually support these commands:
-- ```help``` with the ability to get a more detailed description of any command
 - ```shutdown``` Poweroff the system
 - ```mkdir``` or ```md``` Make a new directory
 - ```rmdir``` or ```rm``` Remove a directory
