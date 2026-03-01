@@ -21,7 +21,12 @@ PyDOS currently supports these comamnds:
 - ```rm``` or ```del``` Deletes a file or a directory.
   Note: Only deleting files and directories inside the current working directory supported.
 - ```changepassword``` Changes the password of the current account
-  
+
+## Other supported stuff
+
+PyDOS now supports saving the current state and loading it! It can either be done manually through commands ```save_state```  
+```load``` commands and when logging off.
+
 ## Commands that are in progress
 
 PyDOS will eventually support these commands:
@@ -36,7 +41,6 @@ PyDOS will eventually support these commands:
 PyDOS will eventually support:
 - editing a .txt or a .pds file tha exists within the directory PyDOS is in 
 - scripts, with a .pds extension (short for PyDosScript), that are written on your host PC, or through the edit feature in PyDOS
-- saving the state on ```shutdown```, ```logoff``` and when a bugcheck is raised
 
 ## Notes
 The defaut account is ```admin```, with the password ```root```.  
