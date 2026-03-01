@@ -1,5 +1,9 @@
 ## Changelog
 
+## v1.4.3 alpha
+- Added rmdir command. Only relative paths supported (Folder or file is always deleted in the working directory)
+- Added changepassword command.
+
 ## v1.4.2 alpha
 - Added mkdir command. Only relative paths supported (Folder is always made in the working directory)
 
