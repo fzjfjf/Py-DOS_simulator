@@ -18,7 +18,7 @@ PyDOS currently supports these comamnds:
 ## Commands that are in progress
 
 PyDOS will eventually support these commands:
-- ```help``` Lists all commands with a brief explanation
+- ```help``` Lists all commands with a brief explanation, or a detailed desription of a comamnd after ```help``` 
 - ```cd``` Change the working directory
 - ```shutdown``` Poweroff the system
 - ```mkdir``` or ```md``` Make a new directory
