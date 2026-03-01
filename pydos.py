@@ -112,7 +112,6 @@ class FileSystem:
         return return_value
 
     def make_directory(self, args: list[str], current_path):
-        current_folder = self.get_current_folder(current_path)
 
         try:
             folder_name_or_path = args[0]
@@ -121,9 +120,10 @@ class FileSystem:
 
         if folder_name_or_path.startswith("c:\\"):
             # Absolute path
-            pass
+            return {"command": "mkdir", "exitcode": "invalidsyntax"} # For now
         else:
             # Relative path
+            current_folder = self.get_current_folder(current_path)
             if folder_name_or_path not in current_folder["folders"]:
                 # Folder doesnt exist
                 current_folder["folders"][folder_name_or_path] = {
@@ -131,11 +131,33 @@ class FileSystem:
                     "files": [],
                 }
             else:
+                # Folder exists
                 return {"command": "mkdir", "exitcode": "folderalreadyexists"}
 
-    def remove_directory_or_file(self):
-        pass
+    def remove_directory_or_file(self, args: list[str], current_path):
+        try:
+            file_or_folder_to_delete = args[0]
+        except IndexError:
+            return {"command": "rm", "exitcode": "invalidsyntax"}
 
+        if file_or_folder_to_delete.startswith("C:\\"):
+            # Absolute path
+            return {"command": "rm", "exitcode": "invalidsyntax"} # For now
+        else:
+            # Relative path
+            current_folder = self.get_current_folder(current_path)
+
+            if file_or_folder_to_delete in current_folder["folders"]:
+                current_folder["folders"].pop(file_or_folder_to_delete)
+            elif file_or_folder_to_delete in current_folder["files"]:
+                for i in range(0, len(current_folder["files"])):
+                    # Get the index of the item so it can be popped
+                    if current_folder["files"][i] == file_or_folder_to_delete:
+                        current_folder["files"].pop(i)
+                        break
+            else:
+                return {"command": "rm", "exitcode": "filefolderdoesntexist"}
+            return {"command": "rm", "exitcode": "succesful"}
 
 class UserAccount:
     def __init__(self):
@@ -179,6 +201,12 @@ class UserAccount:
 
         return False
 
+    def change_password(self, new_password):
+        if not isinstance(new_password, str):
+            return {"command": "changepassword", "exitcode": "invalidsyntax"}
+
+        self._password = sha256(new_password.encode()).hexdigest()
+        return {"command": "changepassword", "exitcode": "succesful"}
 
 
 class Kernel:
@@ -260,6 +288,11 @@ class Kernel:
                 return self.create_user(split_user_input[1:])
             elif split_user_input[0] == "mkdir" or split_user_input[0] == "md":
                 return self._mounted_drives[self._working_drive].make_directory(split_user_input[1:], self._path)
+            elif split_user_input[0] == "rm" or split_user_input[0] == "del":
+                return self._mounted_drives[self._working_drive].remove_directory_or_file(split_user_input[1:],
+                                                                                          self._path)
+            elif split_user_input[0] == "changepassword":
+                return self._users[self._current_user].change_password(split_user_input[1])
             else:
                 return {"command": "invalid"}
         except IndexError:
@@ -304,7 +337,7 @@ class Shell:
     def __init__(self, kernel):
         self.kernel = kernel
         self._dos_prompt: str = "C:\\> "
-        self._version_info: str = "PY-DOS 1.4.2 alpha"
+        self._version_info: str = "PY-DOS 1.4.1 alpha"
         self._shell_commands: dict= {
             "ver": self.version,
             "help": self.help,
@@ -354,6 +387,11 @@ Directory of {self._dos_prompt.strip("> ")}
                     elif result["command"] == "mkdir":
                         print("Invalid syntax") if result["exitcode"] == "invalidsyntax" else None
                         print("Folder already exists") if result["exitcode"] == "folderalreadyexists" else None
+                    elif result["command"] == "rm":
+                        print("Invalid syntax") if result["exitcode"] == "invalidsyntax" else None
+                        print("File or folder doesnt exist") if result["exitcode"] == "filefolderdoesntexist" else None
+                    elif result["command"] == "changepassword":
+                        print("Invalid syntax") if result["exitcode"] == "invalidsyntax" else None
 
     def command_loop(self):
         self._is_running = True
