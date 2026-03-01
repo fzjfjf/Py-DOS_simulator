@@ -2,7 +2,7 @@
 
 Disclaimer: The project is under construction, so the README may not reflect the actual changes in each revision
 
-PyDOS is a simple DOS emulator, that replicates some DOS functionalities, and adds other ones. 
+PyDOS is a simple DOS simulator, that replicates some DOS functionalities, and adds other ones. 
 
 ## Supported commands
 
