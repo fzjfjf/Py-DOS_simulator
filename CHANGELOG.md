@@ -1,5 +1,11 @@
 ## Changelog
 
+## v1.5 alpha
+- Added saving and loading state of the simulator thru commands:
+  - ```save_state``` To save the state
+  - ```load``` To load the state
+  Note: If a state.json file exists, it will automatically be loaded
+
 ## v1.4.3 alpha
 - Added rmdir command. Only relative paths supported (Folder or file is always deleted in the working directory)
 - Added changepassword command.
