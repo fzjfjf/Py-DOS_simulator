@@ -18,15 +18,17 @@ PyDOS currently supports these comamnds:
 - ```cd``` Change the working directory
 - ```mkdir``` or ```md``` Makes a new directory
   Note: Currently folders can only be made in the working directory
-
+- ```rm``` or ```del``` Deletes a file or a directory.
+  Note: Only deleting files and directories inside the current working directory supported.
+- ```changepassword``` Changes the password of the current account
+  
 ## Commands that are in progress
 
 PyDOS will eventually support these commands:
 - ```shutdown``` Poweroff the siulator
 - ```mkdir``` or ```md``` To make folders outside the working directory
-- ```rmdir``` or ```rm``` Remove a directory
+- ```rmdir``` or ```rm``` Remove directories outside the working director<
 - ```del``` Delete a file
-- ```changepassword``` Changes the password of an existing account
 
 ## Other features that are in progress
 
