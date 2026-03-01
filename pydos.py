@@ -114,7 +114,7 @@ class FileSystem:
     def make_directory(self, args: list[str], current_path):
 
         try:
-            folder_name_or_path = args[0]
+            folder_name_or_path: str = args[0]
         except IndexError:
             return {"command": "mkdir", "exitcode": "invalidsyntax"}
 
@@ -123,20 +123,21 @@ class FileSystem:
             return {"command": "mkdir", "exitcode": "invalidsyntax"} # For now
         else:
             # Relative path
-            current_folder = self.get_current_folder(current_path)
+            current_folder: dict = self.get_current_folder(current_path)
             if folder_name_or_path not in current_folder["folders"]:
                 # Folder doesnt exist
                 current_folder["folders"][folder_name_or_path] = {
                     "folders": {},
                     "files": [],
                 }
+                return {"command": "mkdir", "exitcode": "succesful"}
             else:
                 # Folder exists
                 return {"command": "mkdir", "exitcode": "folderalreadyexists"}
 
     def remove_directory_or_file(self, args: list[str], current_path):
         try:
-            file_or_folder_to_delete = args[0]
+            file_or_folder_to_delete: str = args[0]
         except IndexError:
             return {"command": "rm", "exitcode": "invalidsyntax"}
 
@@ -145,7 +146,7 @@ class FileSystem:
             return {"command": "rm", "exitcode": "invalidsyntax"} # For now
         else:
             # Relative path
-            current_folder = self.get_current_folder(current_path)
+            current_folder: dict = self.get_current_folder(current_path)
 
             if file_or_folder_to_delete in current_folder["folders"]:
                 current_folder["folders"].pop(file_or_folder_to_delete)
@@ -201,7 +202,7 @@ class UserAccount:
 
         return False
 
-    def change_password(self, new_password):
+    def change_password(self, new_password: str):
         if not isinstance(new_password, str):
             return {"command": "changepassword", "exitcode": "invalidsyntax"}
 
@@ -460,6 +461,10 @@ logoff - Logs out of the current session
 createuser - Creates a new user account (DDA)
 dir - Lists folders and files inside the working directory (DDA)
 cd - Change the working directory (DDA)
+mkdir - Makes a new folder in the working directory (DDA)
+rm - Deletes a file or a folder in the working directory (DDA)
+del - Same as rm
+changepassword - Changes the password of the current user (DDA)
 """)
         else:
             name = args[0]  # No need for a try:...except here because the upper branch will execute if there are no args
@@ -511,6 +516,35 @@ Usage and meaning:
 Syntax:
     echo ARGUMENT
     """)
+            elif name == "mkdir":
+                print("""
+mkdir
+Usage and meaning:
+    mkdir will create a new folder in the working directory 
+    Supported arguments:
+        NAME - name of the folder
+        
+Syntax:
+    mkdir NAME""")
+            elif name == "rm" or name == "del":
+                print("""
+rmdir
+Usage and meaning:
+    rmdir will delete a file or folder in the working directory 
+    Supported arguments:
+        NAME - name of the folder
+Syntax:
+    rmdir NAME""")
+            elif name == "changepassword":
+                print("""
+changepassword
+Usage and meaning:
+    changepassword changes the password of the current user
+    Supported arguments:
+        NEW_PASSWORD - the new password
+Syntax:
+    changepassword NEW_PASSWORD""")
+
     def version(self, args):
         # Prints the version
         print(f"\n{self._version_info}\n")
