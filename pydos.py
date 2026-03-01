@@ -1,9 +1,10 @@
-import shutil, json
+import shutil
 from random import randint
 from time import sleep
 from sys import exit, stdin
-from os import name, system
+from os import name, system, path
 from hashlib import sha256
+from json import load, dump
 
 # ========= Classes ========
 # ====== Exception classes =====
@@ -19,6 +20,16 @@ class FileSystem:
     def __init__(self):
         self._folder_structure: dict = {}
         self._drive_label: str = ""
+        self._drive_letter: str = ""
+
+    def package_state(self) -> dict:
+        state = {
+            "letter": self._drive_letter,
+            "fs": self._folder_structure,
+            "label": self._drive_label
+        }
+
+        return state
 
     def initialize_file_system(self, fs):
         # Make a drive label
@@ -57,7 +68,6 @@ class FileSystem:
         _validate_folder(fs)
 
         self._folder_structure: dict = fs
-
     def get_current_folder(self, path_to_use: str):
         # Will return a dict of the current folder
         if path_to_use == "/":
@@ -160,11 +170,23 @@ class FileSystem:
                 return {"command": "rm", "exitcode": "filefolderdoesntexist"}
             return {"command": "rm", "exitcode": "succesful"}
 
+
+
 class UserAccount:
     def __init__(self):
         self._user_name: str = ""
         self._role: str = "normal"
         self._password: str = ""
+
+    def package_state(self) -> dict:
+        # No need for bugcheck because either way all of it is going to be saved
+        state = {
+            "user_name": self._user_name,
+            "role": self._role,
+            "password": self._password
+        }
+
+        return state
 
     def whoami(self):
         return self._user_name
@@ -210,6 +232,7 @@ class UserAccount:
         return {"command": "changepassword", "exitcode": "succesful"}
 
 
+
 class Kernel:
     def __init__(self):
         self._path: str = "/"
@@ -223,6 +246,20 @@ class Kernel:
         }
         self._users["admin"].initialize_user(["admin", "root", "admin"], "admin")
         self.shell = Shell(self)
+
+    def package_state(self, bugcheck: bool) -> dict:
+        if bugcheck:
+            state: dict = {
+                "path": self._path,
+                "working_drive": self._working_drive,
+                "current_user": self._current_user,
+            }
+        else:
+            state: dict = {
+                "working_drive": self._working_drive,
+            }
+
+        return state
 
     def on_boot(self):
         self.mount_drive("c", {
@@ -241,6 +278,8 @@ class Kernel:
             "files": ["autoexec.bat", "config.sys"]
         })
 
+        if path.exists("state.json"):
+            self.load_state_from_json()
         self.login_screen()
 
     def login_screen(self):
@@ -304,6 +343,7 @@ class Kernel:
         self._mounted_drives[drive_letter] = FileSystem()
         try:
             self._mounted_drives[drive_letter].initialize_file_system(fs)
+            self._mounted_drives[drive_letter]._drive_letter = drive_letter
         except InvalidFileSystemStructure as e:
             e = e.args[0]
             if e == "101":
@@ -317,22 +357,64 @@ class Kernel:
             else:
                 self.bug_check(100, "INVALID_FILE_SYSTEM_STRUCTURE")
 
-    def update_path(self, new_path: str):
-        self._path = new_path
-
     def bug_check(self, exit_code: int, exit_code_for_print: str):
         # Kind of like a BSOD or kernel panic
         # Here goes any code that saves the state (currently none)
-
+        self.save_state_to_json(True)
         print(f"The system ran into an error it could not recover from\nEXIT CODE: {exit_code_for_print}")
         sleep(10)
         exit(exit_code)
 
-    def save_state_to_json(self):
-        pass
+    def update_path(self, new_path: str):
+        self._path = new_path
+
+    def save_state_to_json(self, bugcheck=False):
+        # Get all states
+        shell = self.shell.package_state(bugcheck)
+        accounts = []
+        for account in self._users:
+            accounts.append(self._users[account].package_state())
+        drives = []
+        for drive in self._mounted_drives:
+            drives.append(self._mounted_drives[drive].package_state())
+        kernel = self.package_state(bugcheck)
+
+        # Put all states inside one dict
+        full_state = {
+            "bugcheck": bugcheck,
+            "accounts": accounts,
+            "drives": drives,
+            "kernel": kernel,
+        }
+
+        print(full_state)
+        with open("state.json", "w") as f:
+            dump(full_state, f, indent=4)
+
 
     def load_state_from_json(self):
-        pass
+        with open("state.json", "r") as f:
+            state = load(f)
+
+        # Bring back the accounts
+        for account in state["accounts"]:
+            self._users[account["user_name"]] = UserAccount()
+            self._users[account["user_name"]]._user_name = account["user_name"]
+            self._users[account["user_name"]]._password = account["password"]
+            self._users[account["user_name"]]._role = account["role"]
+
+        # Bring back the drives
+        for drive in state["drives"]:
+            self._mounted_drives[drive["letter"]] = FileSystem()
+            self._mounted_drives[drive["letter"]]._folder_structure = drive["fs"]
+            self._mounted_drives[drive["letter"]]._drive_label = drive["label"]
+            self._mounted_drives[drive["letter"]]._drive_letter = drive["letter"]
+
+        self._working_drive = state["kernel"]["working_drive"]
+
+        if state["bugcheck"]:
+            self._path = state["kernel"]["path"]
+            self._current_user = state["kernel"]["current_user"]
 
 class Shell:
     def __init__(self, kernel):
@@ -349,12 +431,35 @@ class Shell:
         self._is_running: bool = True
         self.echo_state: bool = True
 
+    # ======= Functions =======
+    # ===== Methods ===== (mostly dependent on kernel)
+    def package_state(self, bugcheck: bool):
+        if bugcheck is True:
+            state: dict = {
+            "dos_prompt": self._dos_prompt,
+            "version_info": self._version_info,
+            "is_running": self._is_running,
+            "echo_state": self.echo_state,
+        }
+        else:
+            state: dict = {
+                "is_running": self._is_running,
+                "echo_state": self.echo_state,
+            }
+        return state
+
     def parser_and_dispatcher(self, user_input: str):
         # Parses user input and calls functions accordingly
         split_input = user_input.lower().split()
         if len(split_input) > 0:        # Ignore empty input
             if split_input[0] == "trigger_bug_check":   # Debug case
                 self.kernel.bug_check(20, "BUG_CHECK_ON_COMMAND")
+            elif split_input[0] == "save_state":
+                self.kernel.save_state_to_json()
+            elif split_input[0] == "save_state_bugcheck":
+                self.kernel.save_state_to_json(True)
+            elif split_input[0] == "load":
+                self.kernel.load_state_from_json()
             elif split_input[0] in self._shell_commands:    # Check if command is owned by Shell
                 self._shell_commands[split_input[0]](split_input[1:])
             else:       # Pass the command to the kernel
@@ -371,12 +476,12 @@ Directory of {self._dos_prompt.strip("> ")}
                         counter = [2, 0]        # [0] for folders, [1] for files
                         for folder in result["folders"]:      # Go through all folders, print them with <DIR>, and
                                                                 # increase the counter
-                            print(folder, " <DIR>")
+                            print(folder.upper(), " <DIR>")
                             counter[0] += 1
                         for file in result["files"]:      # Go through all files, print them and increase the counter
-                            print(file)
+                            print(file.upper())
                             counter[1] += 1
-                        print(f"Files: {counter[1]}\nFolders: {counter[0]}")    # Print the count
+                        print(f"    Files: {counter[1]}\n    Folders: {counter[0]}")    # Print the count
                     elif result["command"] == "createuser":
                         print("Invalid syntax") if result["exitcode"] == "invalidsyntax" else None
                         print("Only root can create new admin users") if result["exitcode"] == "notenoughprivileges" else None
@@ -401,7 +506,7 @@ Directory of {self._dos_prompt.strip("> ")}
             self.parser_and_dispatcher(user_input)
 
     def update_dos_prompt(self, new_path: str):
-        self._dos_prompt = "C:" + "\\".join(new_path.split("/")) + "> "
+        self._dos_prompt = "C:" + "\\".join(new_path.upper().split("/")) + "> "
 
     def getchar(self):
         # Used for /p in dir - to be added
@@ -421,7 +526,7 @@ Directory of {self._dos_prompt.strip("> ")}
                 termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
                 return ch
 
-    # Shell commands, not dependent on Kernel and FileSystem
+    # ===== Shell commands ===== (not dependent on kernel)
     def logoff(self, args):
         # Here goes any code that saves the current state of the simulator (currently none)
 
