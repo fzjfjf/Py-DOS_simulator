@@ -7,3 +7,4 @@
 - Added ```cd``` command. ```..```, ```.```, ```/``` and relative paths are supported.
 - Added ```help``` command
 - Changed ```shutdown``` to ```logoff```
+- Added type hints to most if not all variables that didnt have them
