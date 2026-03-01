@@ -280,7 +280,7 @@ class Shell:
     def __init__(self, kernel):
         self.kernel = kernel
         self._dos_prompt: str = "C:\\> "
-        self._version_info: str = "PY-DOS 1.4.0 alpha"
+        self._version_info: str = "PY-DOS 1.4.1 alpha"
         self._shell_commands: dict= {
             "ver": self.version,
             "help": self.help,
@@ -386,16 +386,65 @@ Directory of {self._dos_prompt.strip("> ")}
         # Prints all available commands with short explanations
         if len(args) == 0:
             print("""
+    (DDA) = Detailed Description Available
 help - Shows this message
 ver - Shows the version
-echo - Prints the text after the command
+echo - Prints the text after the command (DDA)
 logoff - Logs out of the current session
-createuser - Creates a new user account
-dir - Lists folders and files inside the working directory
+createuser - Creates a new user account (DDA)
+dir - Lists folders and files inside the working directory (DDA)
+cd - Change the working directory (DDA)
 """)
         else:
-            pass
-
+            name = args[0]  # No need for a try:...except here because the upper branch will execute if there are no args
+            if name == "createuser":
+                print("""
+createuser
+Usage and meaning:
+    createuser will create a new user account. 
+    Every account can either be: admin or normal.
+    Every account MUST HAVE a password.
+    Only admin users can create new admin accounts.
+    
+    createuser newuser 1234 normal
+Syntax:
+    createuser username password type
+""")
+            elif name == "dir":
+                print("""
+dir
+Usage and meaning:
+    dir will list all files and folders in the current working directory
+    
+    dir
+Syntax:
+    dir
+""")
+            elif name == "cd":
+                print("""
+cd
+Usage and meaning:
+    cd will change the current working directory
+    Supported arguments:
+        '..' - goes to the parent directory
+        '/' - goes to the root
+        '.' - stays in the current directory
+        PATH - name of a directory in the working directory
+Syntax:
+    cd ARGUMENT
+    """)
+            elif name == "echo":
+                print("""
+echo
+Usage and meaning:
+    echo will print any text after the command to the shell
+    Supported arguments:
+        on - turns echo on
+        off - turns echo off
+        MESSAGE - the text that is printed to the shell
+Syntax:
+    echo ARGUMENT
+    """)
     def version(self, args):
         # Prints the version
         print(f"\n{self._version_info}\n")
