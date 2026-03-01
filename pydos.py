@@ -197,15 +197,18 @@ class Kernel:
 
     def login_screen(self):
         # Is shown at the start, or after typing 'logout' into the shell. Basically its own small shell
-        while True:
+        on_login: bool = True
+        while on_login == True:
             user: str = input("Enter user name: ")
             password: str = input("Enter password: ")
 
             try:
                 if self._users[user].check_password(password):
+                    #on_login = False
                     self._current_user = user
                     self.shell.on_start()
                     self.shell.command_loop()
+
                 else:
                     print("Invalid password")
             except KeyError:
@@ -329,6 +332,7 @@ Directory of {self._dos_prompt.strip("> ")}
                         self.update_dos_prompt(result["newpath"])
 
     def command_loop(self):
+        self._is_running = True
         while self._is_running:
             user_input = input(self._dos_prompt if self.echo_state else "")
             self.parser_and_dispatcher(user_input)
@@ -451,6 +455,7 @@ Syntax:
 
     def on_start(self):
         # Prints starting message
+        self.clear_screen([])
         print(f"""{self._version_info}
 
 Copyright (C) 2026      All rights reserved
