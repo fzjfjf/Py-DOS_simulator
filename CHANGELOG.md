@@ -6,6 +6,7 @@
   - ```state load``` to load the state  
   Note: If a state.json file exists, it will automatically be loaded
 - Added ```shutdown```
+- Simplied if...elif chain in Shell.parser_and_dispatcher method
 
 ## v1.4.3 alpha
 - Added rmdir command. Only relative paths supported (Folder or file is always deleted in the working directory)
