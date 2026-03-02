@@ -2,7 +2,7 @@ import shutil
 from random import randint
 from time import sleep
 from sys import exit, stdin
-from os import name, system, path
+from os import name, system, path, rename
 from hashlib import sha256
 from json import load, dump
 
@@ -265,19 +265,8 @@ class Kernel:
 
     def on_boot(self):
         self.mount_drive("c", {
-            "folders": {
-                "docs": {
-                    "folders": {
-                        "important": {
-                            "folders": {
-
-                            },
-                            "files": []
-                        }
-            },
-                "files": ["readme.txt", "test.txt"]}
-            },
-            "files": ["autoexec.bat", "config.sys"]
+            "folders": {},
+            "files": []
         })
 
         if path.exists("state.json"):
@@ -397,6 +386,7 @@ class Kernel:
 
         # Put all states inside one dict
         full_state = {
+            "shell": shell,
             "bugcheck": bugcheck,
             "accounts": accounts,
             "drives": drives,
@@ -408,8 +398,14 @@ class Kernel:
 
 
     def load_state_from_json(self):
-        with open("state.json", "r") as f:
-            state = load(f)
+        try:
+
+            with open("state.json", "r") as f:
+                state = load(f)
+        except Exception:
+            # If the json file is corrupted in any way, stop IMMEDIATELY
+            rename("state.json", "state CORRUPTED.json")
+            self.bug_check(0, "INVALID_STATE_FILE")
 
         # Bring back the accounts
         self._users = {}
@@ -427,17 +423,23 @@ class Kernel:
             self._mounted_drives[drive["letter"]]._drive_label = drive["label"]
             self._mounted_drives[drive["letter"]]._drive_letter = drive["letter"]
 
-        self._working_drive = state["kernel"]["working_drive"]
-
+        self.shell._is_running = state["shell"]["is_running"]
+        self.shell.echo_state = state["shell"]["echo_state"]
         if state["bugcheck"]:
+            self.shell._dos_prompt = state["shell"]["dos_prompt"]
+            self.shell._version_info = state["shell"]["version_info"]
+
             self._path = state["kernel"]["path"]
             self._current_user = state["kernel"]["current_user"]
+
+        self._working_drive = state["kernel"]["working_drive"]
+
 
 class Shell:
     def __init__(self, kernel):
         self.kernel = kernel
         self._dos_prompt: str = "C:\\> "
-        self._version_info: str = "PY-DOS 1.4.1 alpha"
+        self._version_info: str = "PY-DOS 1.5.0 alpha"
         self._shell_commands: dict= {
             "ver": self.version,
             "help": self.help,
