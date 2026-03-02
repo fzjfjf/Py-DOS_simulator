@@ -1,6 +1,9 @@
 ## Changelog
 
-## v1.5 alpha
+## v1.5.1 aplha
+- Improved load_state_from_json
+
+## v1.5.0 alpha
 - Added saving and loading state of the simulator thru commands:
   - ```state save``` to save the state and  
   - ```state load``` to load the state  
