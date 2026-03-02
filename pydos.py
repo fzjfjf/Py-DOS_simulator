@@ -117,7 +117,8 @@ class FileSystem:
             "command": "dir",
             "files": files,
             "folders": folders,
-            "label": self._drive_label
+            "label": self._drive_label,
+            "exitcode": "succesful"
         }
         return return_value
 
@@ -334,10 +335,12 @@ class Kernel:
                                                                                           self._path)
             elif split_user_input[0] == "changepassword":
                 return self._users[self._current_user].change_password(split_user_input[1])
-            elif split_user_input[0] == "state" and split_user_input[1] == "save":
-                self.save_state_to_json()
-            elif split_user_input[0] == "state" and split_user_input[1] == "load":
-                self.load_state_from_json()
+            elif split_user_input[0] == "state":
+                if len(split_user_input) == 2:
+                    self.save_state_to_json() if split_user_input[1] == "save" else None
+                    self.load_state_from_json() if split_user_input[1] == "load" else None
+                else:
+                    return {"command": "state", "exitcode": "invalidsyntax"}
             elif split_user_input[0] == "shutdown":
                 self.shutdown()
             else:
@@ -409,6 +412,7 @@ class Kernel:
             state = load(f)
 
         # Bring back the accounts
+        self._users = {}
         for account in state["accounts"]:
             self._users[account["user_name"]] = UserAccount()
             self._users[account["user_name"]]._user_name = account["user_name"]
@@ -416,6 +420,7 @@ class Kernel:
             self._users[account["user_name"]]._role = account["role"]
 
         # Bring back the drives
+        self._mounted_drives = {}
         for drive in state["drives"]:
             self._mounted_drives[drive["letter"]] = FileSystem()
             self._mounted_drives[drive["letter"]].initialize_file_system(drive["fs"])
@@ -432,7 +437,7 @@ class Shell:
     def __init__(self, kernel):
         self.kernel = kernel
         self._dos_prompt: str = "C:\\> "
-        self._version_info: str = "PY-DOS 1.5 alpha"
+        self._version_info: str = "PY-DOS 1.4.1 alpha"
         self._shell_commands: dict= {
             "ver": self.version,
             "help": self.help,
@@ -488,22 +493,21 @@ Directory of {self._dos_prompt.strip("> ")}
                             print(file.upper())
                             counter[1] += 1
                         print(f"    Files: {counter[1]}\n    Folders: {counter[0]}")    # Print the count
-                    elif result["command"] == "createuser":
-                        print("Invalid syntax") if result["exitcode"] == "invalidsyntax" else None
-                        print("Only root can create new admin users") if result["exitcode"] == "notenoughprivileges" else None
-                        print("User already exists") if result["exitcode"] == "userexists" else None
-
                     elif result["command"] == "cd":
+                        # Handle cd separately because it needs to update dos prompt
                         print("Invalid syntax") if result["exitcode"] == "invalidsyntax" else None
                         self.update_dos_prompt(result["newpath"])
-                    elif result["command"] == "mkdir":
-                        print("Invalid syntax") if result["exitcode"] == "invalidsyntax" else None
-                        print("Folder already exists") if result["exitcode"] == "folderalreadyexists" else None
-                    elif result["command"] == "rm":
-                        print("Invalid syntax") if result["exitcode"] == "invalidsyntax" else None
-                        print("File or folder doesnt exist") if result["exitcode"] == "filefolderdoesntexist" else None
-                    elif result["command"] == "changepassword":
-                        print("Invalid syntax") if result["exitcode"] == "invalidsyntax" else None
+                    elif result["exitcode"] == "invalidsyntax":
+                        print("Invalid syntax")
+                    elif result["exitcode"] == "notenoughprivileges":
+                        print("Only admin users can create new admin users")
+                    elif result["exitcode"] == "userexists":
+                        print("User already exists")
+                    elif result["exitcode"] == "folderalreadyexists":
+                        print("Folder already exists")
+                    elif result["exitcode"] == "filefolderdoesntexist":
+                        print("File or folder doesnt exist")
+
 
     def command_loop(self):
         self._is_running = True
@@ -667,8 +671,6 @@ Syntax:
 
 Copyright (C) 2026      All rights reserved
 """)
-
-
 
 
 def main():
