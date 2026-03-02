@@ -246,6 +246,7 @@ class Kernel:
         }
         self._users["admin"].initialize_user(["admin", "root", "admin"], "admin")
         self.shell = Shell(self)
+        self.on_login: bool = True
 
     def package_state(self, bugcheck: bool) -> dict:
         if bugcheck:
@@ -284,8 +285,7 @@ class Kernel:
 
     def login_screen(self):
         # Is shown at the start, or after typing 'logout' into the shell. Basically its own small shell
-        on_login: bool = True
-        while on_login == True:
+        while self.on_login == True:
             user: str = input("Enter user name: ")
             password: str = input("Enter password: ")
 
@@ -334,10 +334,22 @@ class Kernel:
                                                                                           self._path)
             elif split_user_input[0] == "changepassword":
                 return self._users[self._current_user].change_password(split_user_input[1])
+            elif split_user_input[0] == "state" and split_user_input[1] == "save":
+                self.save_state_to_json()
+            elif split_user_input[0] == "state" and split_user_input[1] == "load":
+                self.load_state_from_json()
+            elif split_user_input[0] == "shutdown":
+                self.shutdown()
             else:
                 return {"command": "invalid"}
         except IndexError:
             return {"command": "createuser", "exitcode": "invalidsyntax"}
+
+    def shutdown(self):
+        self.save_state_to_json()
+        self.on_login = False
+        self.shell._is_running = False
+
 
     def mount_drive(self, drive_letter: str, fs: dict):
         # Will mount the drive
@@ -388,7 +400,6 @@ class Kernel:
             "kernel": kernel,
         }
 
-        print(full_state)
         with open("state.json", "w") as f:
             dump(full_state, f, indent=4)
 
@@ -407,7 +418,7 @@ class Kernel:
         # Bring back the drives
         for drive in state["drives"]:
             self._mounted_drives[drive["letter"]] = FileSystem()
-            self._mounted_drives[drive["letter"]]._folder_structure = drive["fs"]
+            self._mounted_drives[drive["letter"]].initialize_file_system(drive["fs"])
             self._mounted_drives[drive["letter"]]._drive_label = drive["label"]
             self._mounted_drives[drive["letter"]]._drive_letter = drive["letter"]
 
@@ -455,12 +466,6 @@ class Shell:
         if len(split_input) > 0:        # Ignore empty input
             if split_input[0] == "trigger_bug_check":   # Debug case
                 self.kernel.bug_check(20, "BUG_CHECK_ON_COMMAND")
-            elif split_input[0] == "save_state":
-                self.kernel.save_state_to_json()
-            elif split_input[0] == "save_state_bugcheck":
-                self.kernel.save_state_to_json(True)
-            elif split_input[0] == "load":
-                self.kernel.load_state_from_json()
             elif split_input[0] in self._shell_commands:    # Check if command is owned by Shell
                 self._shell_commands[split_input[0]](split_input[1:])
             else:       # Pass the command to the kernel
