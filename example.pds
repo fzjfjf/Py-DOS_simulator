@@ -1,0 +1,10 @@
+#Hello, this is a comment
+echo Hello World!
+dir /p
+
+echo off
+echo Hi, who are you?
+dir
+cd \
+cd dos
+dir /p
