@@ -3,7 +3,7 @@
 ## v1.5 alpha
 - Added saving and loading state of the simulator thru commands:
   - ```state save``` to save the state and
-  - ```state load``` to load the state
+  - ```state load``` to load the state  
   Note: If a state.json file exists, it will automatically be loaded
 - Added ```shutdown```
 
