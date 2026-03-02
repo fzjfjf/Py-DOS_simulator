@@ -21,19 +21,15 @@ PyDOS currently supports these comamnds:
 - ```rm``` or ```del``` Deletes a file or a directory.
   Note: Only deleting files and directories inside the current working directory supported.
 - ```changepassword``` Changes the password of the current account
-
-## Other supported stuff
-
-PyDOS now supports saving the current state and loading it! It can either be done manually through commands ```save_state```  
-```load``` commands and when logging off.
-
+- ```state save``` Saves the current state of the simulator
+- ```state load``` Loads the saved state of the simulator
+- ```shutdown``` Poweroff the siulator
+  
 ## Commands that are in progress
 
 PyDOS will eventually support these commands:
-- ```shutdown``` Poweroff the siulator
 - ```mkdir``` or ```md``` To make folders outside the working directory
-- ```rmdir``` or ```rm``` Remove directories outside the working director<
-- ```del``` Delete a file
+- ```rmdir``` or ```rm``` Remove directories outside the working directory
 
 ## Other features that are in progress
 
