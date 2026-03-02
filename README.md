@@ -40,4 +40,5 @@ PyDOS will eventually support:
 
 ## Notes
 The defaut account is ```admin```, with the password ```root```.  
-The login screen is CASE SENSITIVE, the shell is CASE INSENSITIVE
+The login screen is CASE SENSITIVE, the shell is CASE INSENSITIVE  
+If ```state.json``` is corrupted, a bugcheck will be raised. ```state.json``` will be renamed to ```state CORRUPTED```, and a new clean ```state.json``` will be generated.
